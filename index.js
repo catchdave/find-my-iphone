@@ -1,16 +1,32 @@
 var request = require("request");
 var util = require("util");
+var DEFAULT_CONFIG_FILE = "./config/prod.js";
+
+var checkConfigValues = function (configValues) {
+	if (!configValues.hasOwnProperty("apple_id") || !configValues.hasOwnProperty("password")) {
+		retun false;
+	}
+
+	if (configValues.apple_id == null || configValues.password == null) {
+		retun false;
+	}
+
+	return true;
+};
 
 var findmyphone = {
 	init: function(callback) {
 
-		if (!findmyphone.hasOwnProperty("apple_id") || !findmyphone.hasOwnProperty("password")) {
-			return callback("Please define apple_id / password");
+		// Load config values from explicit properties or file.
+		if (!checkConfigValues(findmyphone)) { // Check global properties first
+			var fileConfig = loadConfig(DEFAULT_CONFIG_FILE);
+			if (!checkConfigValues(fileConfig)) { // Fallback to file config
+				return callback("Please define apple_id / password");
+			}
+			findmyphone.apple_id = fileConfig.apple_id;
+			findmyphone.password = fileConfig.apple_password;
 		}
 
-		if (findmyphone.apple_id == null || findmyphone.password == null) {
-			return callback("Please define apple_id / password");
-		}
 
 		var newLogin = !findmyphone.hasOwnProperty("jar");
 		if (newLogin) {
@@ -44,6 +60,17 @@ var findmyphone = {
 					return callback(err, res, body);
 				}
 			});
+		}
+	},
+	/**
+	 * Loads configuration from the specified file
+	 */
+	loadConfig: function(configFile) {
+		try {
+			config = require(configFile);
+			return {config.apple_id, config.apple_password};
+		} catch (e) {
+			return null;
 		}
 	},
 	login: function(callback) {
