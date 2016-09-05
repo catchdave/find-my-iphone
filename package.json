@@ -22,6 +22,6 @@
   "license": "MIT",
   "dependencies": {
     "request": "^2.57.0",
-    "tough-cookie": "^1.2.0"
+    "tough-cookie": "^2.3.0"
   }
 }
