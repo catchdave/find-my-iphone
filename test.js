@@ -1,22 +1,47 @@
-var icloud = require("./index").findmyphone;
-var assert = require("assert");
+// To run tests:
+// 1. Fill in variables in config/test.js
+// 2. run "mocha test"
 
-//apple_id=someone@gmail.com apple_password=somePassword mocha test
+var icloud = require("./index").findmyphone,
+    assert = require("assert"),
+    config = require("./config/test.js"),
+    configDefaults = require("./config/test-sample.js");
+
+var validateConfig = function () {
+	var errors = 0;
+
+	if (!config.hasOwnProperty("apple_id")) {
+		console.error("Missing apple_id config variable");
+		errors++;
+	}
+	if (!config.hasOwnProperty("apple_password")) {
+		console.error("Missing apple_password config variable");
+		errors++;
+	}
+	if (config.apple_id === configDefaults.apple_id) {
+		console.error("The apple_id config variable has not been changed from the default");
+		errors++;
+	}
+	if (config.apple_password === configDefaults.apple_password) {
+		console.error("The apple_password config variable has not been changed from the default");
+		errors++;
+	}
+
+	return (errors == 0);
+};
+
 describe('Logged in: ', function() {
 	var device;
 
 	before(function(done) {
 		this.timeout(30000);
 
-		if (!process.env.hasOwnProperty("apple_id")) {
-			console.error("Missing apple_id environmental variable");
-		}
-		if (!process.env.hasOwnProperty("apple_password")) {
-			console.error("Missing apple_password environmental variable");
+		if (!validateConfig()) {
+			return;
 		}
 
-		icloud.apple_id = process.env.apple_id;
-		icloud.password = process.env.apple_password;
+		icloud.apple_id = config.apple_id;
+		icloud.password = config.apple_password;
 
 		assert(icloud.apple_id);
 		assert(icloud.password);
